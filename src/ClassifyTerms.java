@@ -19,26 +19,34 @@ public class ClassifyTerms {
       // String content = "cube root of 4000"; // deosnt work
       String content = "google calendar automatic data collection"; // works
       content = correctTokenAmount(content);
-      // TODO create method to classify a single string - output will be string category
-      Document doc = Document.newBuilder().setContent(content).setType(Type.PLAIN_TEXT).build();
-      ClassifyTextRequest request = ClassifyTextRequest.newBuilder().setDocument(doc).build();
-      // detect categories in the given text
-      ClassifyTextResponse response = language.classifyText(request);
-
-      if (response.getCategoriesCount() == 0) {
-        System.out.println("classification failed.");
-      }
-
-      for (ClassificationCategory category : response.getCategoriesList()) {
-        System.out.printf("Category name : %s, Confidence : %.3f\n", category.getName(),
-            category.getConfidence());
-      }
+      System.out.print(classifyContent(language, content));
     } catch (com.google.api.gax.rpc.InvalidArgumentException e) {
       System.out.println("not enough tokens, probably");
       System.out.println();
     }
 
     System.out.println("end");
+  }
+
+  private static String classifyContent(LanguageServiceClient language, String content) {
+
+    String output = "";
+
+    Document doc = Document.newBuilder().setContent(content).setType(Type.PLAIN_TEXT).build();
+    ClassifyTextRequest request = ClassifyTextRequest.newBuilder().setDocument(doc).build();
+    // detect categories in the given text
+    ClassifyTextResponse response = language.classifyText(request);
+
+    if (response.getCategoriesCount() == 0) {
+      System.out.println("classification failed.");
+    }
+
+    for (ClassificationCategory category : response.getCategoriesList()) {
+      output += String.format("Category name : %s, Confidence : %.3f\n", category.getName(),
+          category.getConfidence());
+    }
+
+    return output;
   }
 
   private static String correctTokenAmount(String input) {
