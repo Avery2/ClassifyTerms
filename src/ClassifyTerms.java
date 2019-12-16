@@ -8,17 +8,20 @@ import com.google.cloud.language.v1.LanguageServiceClient;
 
 public class ClassifyTerms {
 
+  private static ClassifyTextRequest request;
+  private static ClassifyTextResponse response;
+
   public static void main(String[] args) throws IOException {
     System.out.println("start");
 
     // Instantiate the Language client com.google.cloud.language.v1.LanguageServiceClient
     try (LanguageServiceClient language = LanguageServiceClient.create()) {
       // set content to the text string
-      // Important: You must supply a text block (document) with at least twenty tokens (words) to
-      // the classifyText method.
       // String content = "cube root of 4000"; // deosnt work
       String content = "google calendar automatic data collection"; // works
+      // correct the token amount
       content = correctTokenAmount(content);
+
       System.out.print(classifyContent(language, content));
     } catch (com.google.api.gax.rpc.InvalidArgumentException e) {
       System.out.println("not enough tokens, probably");
@@ -32,10 +35,11 @@ public class ClassifyTerms {
 
     String output = "";
 
+    // set content (into correct format) TODO do I have to build this every time?
     Document doc = Document.newBuilder().setContent(content).setType(Type.PLAIN_TEXT).build();
-    ClassifyTextRequest request = ClassifyTextRequest.newBuilder().setDocument(doc).build();
+    request = ClassifyTextRequest.newBuilder().setDocument(doc).build();
     // detect categories in the given text
-    ClassifyTextResponse response = language.classifyText(request);
+    response = language.classifyText(request);
 
     if (response.getCategoriesCount() == 0) {
       System.out.println("classification failed.");
@@ -50,6 +54,8 @@ public class ClassifyTerms {
   }
 
   private static String correctTokenAmount(String input) {
+    // Important: You must supply a text block (document) with at least twenty tokens (words) to
+    // the classifyText method.
     String output = input;
     // add ' until correct tokens
     // int numTokens = countTokens(input);
