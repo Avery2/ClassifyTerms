@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import com.google.cloud.language.v1.ClassificationCategory;
 import com.google.cloud.language.v1.ClassifyTextRequest;
@@ -12,14 +15,26 @@ public class ClassifyTerms {
   private static ClassifyTextResponse response;
 
   public static void main(String[] args) throws IOException {
+    String content = null;
     System.out.println("start");
+
+    // TODO have json file reader instead
+//    File file = new File("myactivity.txt");
+//    BufferedReader inputStream = new BufferedReader(new FileReader(file));
 
     // Instantiate the Language client com.google.cloud.language.v1.LanguageServiceClient
     try (LanguageServiceClient language = LanguageServiceClient.create()) {
       // set content to the text string
-      // String content = "cube root of 4000"; // deosnt work
-      String content = "google calendar automatic data collection"; // works
-      // correct the token amount
+      // content = "google calendar automatic data collection"; // works
+//      for (int i = 0; i < 5; i++) {
+//        content = inputStream.readLine();
+//        while (content.trim().length() < 1) {
+//          content = inputStream.readLine();
+//        }
+//      }
+      
+      content = "Concatenate a string like in printf - Stack Overflow";
+      
       content = correctTokenAmount(content);
 
       System.out.print(classifyContent(language, content));
@@ -28,6 +43,7 @@ public class ClassifyTerms {
       System.out.println();
     }
 
+//    inputStream.close();
     System.out.println("end");
   }
 
@@ -57,17 +73,6 @@ public class ClassifyTerms {
     // Important: You must supply a text block (document) with at least twenty tokens (words) to
     // the classifyText method.
     String output = input;
-    // add ' until correct tokens
-    // int numTokens = countTokens(input);
-    // if (numTokens > 19) {
-    // return input;
-    // } else {
-    // for (int i = 0; i < 20 - numTokens; i++) {
-    // input += " ' ";
-    // }
-    // return input.trim().toLowerCase();
-    // }
-    // repeat until enough tokens
     while (countTokens(output) < 20) {
       output += " " + input.trim();
     }
