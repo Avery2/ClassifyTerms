@@ -54,6 +54,7 @@ public class ClassifyTerms {
     String output = "";
     String conf;
     String[] subject;
+    Sentiment sentiment = null;
 
     Document doc = Document.newBuilder().setContent(content).setLanguage("en")
         .setType(Type.PLAIN_TEXT).build();
@@ -62,8 +63,6 @@ public class ClassifyTerms {
       request = ClassifyTextRequest.newBuilder().setDocument(doc).build();
       // detect categories in the given text
       response = language.classifyText(request);
-
-
 
       // write classification
       // name: "/Arts & Entertainment/TV & Video/TV Shows & Programs"\nconfidence: 0.83
@@ -81,25 +80,22 @@ public class ClassifyTerms {
         conf = response.getCategories(0).toString().split("\n")[1].split(" ")[1];
         subject = response.getCategories(0).toString().split("\"")[1].split("/");
 
-
-//        for (String s : subject) {
-//          System.out.println(s);
-//        }
+        // for (String s : subject) {
+        // System.out.println(s);
+        // }
         if (subject.length < 3) {
           output += subject[1] + "," + "," + conf + ",";
         } else {
           output += subject[1] + "," + subject[2] + "," + conf + ",";
         }
       }
-
-
-
     } catch (com.google.api.gax.rpc.InvalidArgumentException e) {
       System.out.println("not enough tokens, probably");
     } catch (com.google.api.gax.rpc.ResourceExhaustedException e) {
       System.out.println("\'slow down buddy\' -google");
+      e.printStackTrace();
       try {
-        Thread.sleep(60001);
+        Thread.sleep(30000);
       } catch (InterruptedException e1) {
         e1.printStackTrace();
       }
@@ -122,16 +118,26 @@ public class ClassifyTerms {
 
     // sentiment analysis
 
-    AnalyzeSentimentResponse response = language.analyzeSentiment(doc);
-    Sentiment sentiment = response.getDocumentSentiment();
-    if (sentiment == null) {
-      System.out.println("sentiment failed");
-      output += (",,");
-    } else {
-      // output += String.format("Sentiment magnitude: %.3f,", sentiment.getMagnitude());
-      output += sentiment.getMagnitude() + ",";
-      // output += String.format("Sentiment score: %.3f,", sentiment.getScore());
-      output += sentiment.getScore() + ",";
+    try {
+      AnalyzeSentimentResponse response = language.analyzeSentiment(doc);
+      sentiment = response.getDocumentSentiment();
+      if (sentiment == null) {
+        System.out.println("sentiment failed");
+        output += (",,");
+      } else {
+        // output += String.format("Sentiment magnitude: %.3f,", sentiment.getMagnitude());
+        output += sentiment.getMagnitude() + ",";
+        // output += String.format("Sentiment score: %.3f,", sentiment.getScore());
+        output += sentiment.getScore() + ",";
+      }
+    } catch (com.google.api.gax.rpc.ResourceExhaustedException e) {
+      System.out.println("\'slow down buddy\' -google");
+      e.printStackTrace();
+      try {
+        Thread.sleep(30000);
+      } catch (InterruptedException e1) {
+        e1.printStackTrace();
+      }
     }
 
     return output;

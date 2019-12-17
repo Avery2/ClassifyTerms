@@ -39,11 +39,14 @@ public class JSONReader {
 
       String[] time;
       // TODO
-      for (Object o : myActivity) {
+//      for (Object o : myActivity) {
+         for (int index = 0; index < myActivity.size(); index+=20) { // TODO possible workaround is
+        // to save state when crash and start from there
         System.out.println(i);
         // setup
         i++;
-        temp = (JSONObject) o;
+         temp = (JSONObject) myActivity.get(index);
+//        temp = (JSONObject) o;
 
         time = parseTime(temp.get("time").toString()); // write CSV time
         for (String s : time) {
